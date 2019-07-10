@@ -1,8 +1,28 @@
 # Lasershark
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/lasershark`. To experiment with that code, run `bin/console` for an interactive prompt.
+This gem fixes the interactor gem's context object so that you have to define it, and it's not just an OpenStruct. You'll declare a context object for each interactor, so that way if you try to call a setter or getter on it that doesn't exist, then instead of getting `nil` you get a real `MethodMissing` error.
 
-TODO: Delete this and the text above, and describe your gem
+Example:
+```ruby
+class CategorizeProducts
+  include Lasershark
+
+  context_with(
+    Class.new(Lasershark::BaseContext) do
+      attr_accessor :products, :categories, :categorized_products_count
+    end
+  )
+  delegate :products, :categories, :categorized_products_count, to: :context
+
+  def call
+    products.each do |product|
+      categorized_products_count += 1 if categorize_product(product, categories)
+    end
+  end
+end
+```
+
+The above code creates a new class with `Lasershark::BaseContext` as its parent, and uses it as the context object for this interactor.
 
 ## Installation
 
